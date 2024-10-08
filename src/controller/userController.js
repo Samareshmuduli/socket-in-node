@@ -145,20 +145,29 @@ exports.login = async (req, res) => {
 
   try {
   
-    const user = await User.findOne({ username });
-    if (!user) {
+    const user = await User.findOne({ username:username });
+    console.log('user6666666666666', user.password)
+
+    console.log(' password body:', password);
+    if (user) {
+      if(user.password==password){
+        
+        res.status(200).json({ message: 'Logged in successfully',user}); 
+      }else{
+
+        return res.status(401).json({ message: 'Invalid password' }); 
+      }
+    }
+    else {
       return res.status(404).json({ message: 'User not found' }); 
     }
+      // console.log("userid=========================",user)
+
     // const match = await bcrypt.compare(password, user.password);
-    if (!password) {
-      return res.status(401).json({ message: 'Invalid password' }); 
-    }
    
     // const token = jwt.sign({ id: user._id }, "Xty139@qt", { expiresIn: '1d' });
-    console.log("userid=========================",user)
-    res.status(200).json({ message: 'Logged in successfully',user}); 
   } catch (err) {
-    res.status(500).json({ message: err.message }); 
+    res.status(500).json({ message:'Invalid username and password.' }); 
   }
 };
   
