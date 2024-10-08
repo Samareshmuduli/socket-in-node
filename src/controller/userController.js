@@ -45,11 +45,48 @@ exports.register= async (req, res) => {
  * @param {*} res 
  * @returns 
  */
+// exports.getAllUsers = async (req, res) => {
+//   try {
+//     console.log("bbbbbb",req.body)
+//     const currentUserId=req.body._id;
+//     const users = await User.find();
+
+//     const userMessages = await Promise.all(users.map(async (user) => {
+//       // Get the latest message where the user is either sender or receiver
+//       const latestMessage = await Message.findOne({
+//         $or: [
+//           { senderId: user._id, reciverId: currentUserId },
+//           { senderId: currentUserId, reciverId: user._id }
+          
+//         ]
+//       })
+//       .sort({ createdAt: -1 })  // Sorting in descending order to get the latest message
+//       .limit(1);  // To get a single message
+
+//       return {
+//         ...user.toObject(), // Convert the user document to a plain object
+//         latestMessage: latestMessage || null,  // Add latest message or null if not found
+//       };
+//     }));
+//     console.log("--------",userMessages)
+//     res.json(userMessages);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };
+
 exports.getAllUsers = async (req, res) => {
   try {
-    console.log("bbbbbb",req.body)
-    const currentUserId=req.body._id;
-    const users = await User.find();
+    console.log("Request Body:", req.body);
+    const currentUserId = req.body._id;
+    const searchTerm = req.body.searchTerm || '';  // Search term from request body
+    console.log('searchTerm', searchTerm)
+
+    // Build a regex query for username if searchTerm is provided
+    const searchQuery = searchTerm ? { username: { $regex: searchTerm, $options: 'i' } } : {};
+
+    // Find users based on the search query
+    const users = await User.find(searchQuery);
 
     const userMessages = await Promise.all(users.map(async (user) => {
       // Get the latest message where the user is either sender or receiver
@@ -57,23 +94,33 @@ exports.getAllUsers = async (req, res) => {
         $or: [
           { senderId: user._id, reciverId: currentUserId },
           { senderId: currentUserId, reciverId: user._id }
-          
         ]
       })
       .sort({ createdAt: -1 })  // Sorting in descending order to get the latest message
       .limit(1);  // To get a single message
 
       return {
-        ...user.toObject(), // Convert the user document to a plain object
+        ...user.toObject(),  // Convert the user document to a plain object
         latestMessage: latestMessage || null,  // Add latest message or null if not found
       };
     }));
-    console.log("--------",userMessages)
+
+    // Move the current user to the zero index
+    const currentUserIndex = userMessages.findIndex(user => user._id.toString() === currentUserId.toString());
+
+    if (currentUserIndex !== -1) {
+      const [currentUser] = userMessages.splice(currentUserIndex, 1);  // Remove current user
+      userMessages.unshift(currentUser);  // Place the current user at the start
+    }
+
+    console.log("User Messages:", userMessages);
     res.json(userMessages);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+
 
 
 // exports.getUserId= async(req,res)=>{
