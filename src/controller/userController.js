@@ -1,3 +1,4 @@
+const message = require('../model/messageSchema');
 const Message = require('../model/messageSchema');
 const User = require('../model/userSchema');
 /** User registration
@@ -26,7 +27,7 @@ exports.register= async (req, res) => {
       });
       // console.log(user);
       const newUser = await user.save();
-      res.status(201).json(newUser); // Created
+      res.status(201).json({message:'Registered sucessfully',newUser}); // Created
     } catch (err) {
       res.status(400).json({ message: err.message }); 
     }
@@ -113,7 +114,7 @@ exports.getAllUsers = async (req, res) => {
       userMessages.unshift(currentUser);  // Place the current user at the start
     }
 
-    console.log("User Messages:", userMessages);
+    // console.log("User Messages:", userMessages);
     res.json(userMessages);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });

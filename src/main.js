@@ -51,6 +51,7 @@ const port = 3000;
 connectDB();
 
 const userSocketMap = {}
+console.log('userSocketMap', userSocketMap)
 
 io.on('connection', (socket) => {
   // console.log('socketttttt', socket)
@@ -73,19 +74,70 @@ io.on('connection', (socket) => {
       });
       message.save();
       
+      console.log('userSocketMap', userSocketMap)
       const socketId = userSocketMap[data.receieverId]
       console.log('socketIdddddd', socketId)
 
       if(socketId){
         console.log('socketId111111111111', socketId)
         io.to(socketId).emit("message", message);
+        console.log('message---------------', message)
+        
       }
 
       // io.emit('message', data);  
     });
   
+    // Handle video call offer
+    socket.on('offer', (offer) => {
+      // console.log('offerrrrrr', offer)
+      // console.log('offer', offer)
+      const receiverId = offer.receiverid; // Get the receiver ID from the offer
+      // console.log('receiverId2222222222222', receiverId)
+      const socketId = userSocketMap[receiverId];
+      console.log('socketId========================================', socketId)
+      if (socketId) {
+          io.to(socketId).emit('offer', offer);
+          console.log('offer---------', offer)
+      }
+  });
+  
+  
+
+  // Handle video call answer
+  socket.on('answer', (answer) => {
+    // console.log('answer', answer)
+      const  receiverId  = answer.receiverId; // Get the receiver ID from the answer
+      
+      const socketId = userSocketMap[receiverId];
+      if (socketId) {
+          io.to(socketId).emit('answer', answer);
+          console.log('answer----------', answer)
+      }
+  });
+
+  // Handle ICE candidate
+  socket.on('ice-candidate', (candidate) => {
+    // console.log('candidate', candidate)
+      const  receiverId  = candidate.receiverId; // Get the receiver ID from the candidate
+      const socketId = userSocketMap[receiverId];
+      if (socketId) {
+          io.to(socketId).emit('ice-candidate', candidate);
+          console.log('candidate-----', candidate)
+      }
+  });
+
     socket.on('disconnect', () => {
       console.log('a user disconnected!');
+
+       // Remove the user from the userSocketMap
+       for (const userId in userSocketMap) {
+        if (userSocketMap[userId] === socket.id) {
+            delete userSocketMap[userId];
+            break;
+        }
+    }
+
     });
 });
 

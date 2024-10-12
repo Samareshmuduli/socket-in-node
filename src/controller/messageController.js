@@ -36,11 +36,11 @@ const { param } = require('../Router/userRouter');
  * @returns 
  */
 exports.showMessage= async (req, res) => {
-    console.log("7777777777",req.body)
+    // console.log("7777777777",req.body)
     senderId = req.body.senderId;
     recieverId=req.body.reciverId;
     let messages
-    console.log("senderId ID", senderId, "recieverId",recieverId);
+    // console.log("senderId ID", senderId, "recieverId",recieverId);
    if(senderId && recieverId){
     //  messages=await Message.find({ senderId: senderId,reciverId:recieverId }).sort({"updatedAt": 1})
 
@@ -50,7 +50,7 @@ exports.showMessage= async (req, res) => {
           { senderId: recieverId, reciverId: senderId }
         ]
       }).sort({ "updatedAt": 1 });
-    console.log('amewsss=====================:', messages.length);
+    // console.log('amewsss=====================:', messages.length);
 }
     
    res.status(201).json({
